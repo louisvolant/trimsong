@@ -30,8 +30,18 @@ def trim_silence(audio_file, silence_threshold=-50, min_silence_len=100):
     if silence_ranges:
         logging.info('Detected silence_ranges: {0}'.format(silence_ranges))
 
-        start_trim = silence_ranges[0][1]
-        end_trim = silence_ranges[-1][0]
+        # Finding leading silence
+        if silence_ranges[0][0] == 0:
+            start_trim = silence_ranges[0][1]
+        else:
+            start_trim = 0
+        
+        # Finding trailing silence
+        if silence_ranges[-1][0] != 0:
+            end_trim = silence_ranges[-1][0]
+        else:
+            end_trim = len(sound)
+
     else:
         logging.info('No detected silence range')
 
