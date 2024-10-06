@@ -23,12 +23,14 @@ def trim_silence(audio_file, silence_threshold=-50, min_silence_len=100):
     # Load the audio file
     sound = AudioSegment.from_mp3(audio_file)
     
+    sound_length = len(sound)
+    
     # Detect silence
     silence_ranges = detect_silence(sound, min_silence_len=min_silence_len, silence_thresh=silence_threshold)
     
     # If there's silence at the beginning or end
     if silence_ranges:
-        logging.info('Detected silence_ranges: {0}'.format(silence_ranges))
+        logging.info('Detected silence_ranges: {0} | Sound length: {1}'.format(silence_ranges, sound_length))
 
         # Finding leading silence
         if silence_ranges[0][0] == 0:
@@ -37,7 +39,7 @@ def trim_silence(audio_file, silence_threshold=-50, min_silence_len=100):
             start_trim = 0
         
         # Finding trailing silence
-        if silence_ranges[-1][0] != 0:
+        if (silence_ranges[-1][0] != 0 & silence_ranges[-1][1] == len(sound)) :
             end_trim = silence_ranges[-1][0]
         else:
             end_trim = len(sound)

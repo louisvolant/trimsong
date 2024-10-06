@@ -21,6 +21,14 @@ def rename_file(dir_path, filename):
         # Construire les chemins complets des fichiers
         old_filepath = os.path.join(dir_path, filename)
         new_filepath = os.path.join(dir_path, new_filename)
+        
+        # Vérifier si le fichier sans "_trimmed" existe déjà
+        if os.path.exists(new_filepath):
+            # Si oui, le supprimer
+            os.remove(new_filepath)
+            print(f"Deleted existing file: {new_filepath}")
+        
+        
         # Renommer le fichier
         os.rename(old_filepath, new_filepath)
         print(f"Renamed: {old_filepath} to {new_filepath}")
