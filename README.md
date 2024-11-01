@@ -10,7 +10,7 @@ Python3, pydub
 ````
 python3 -m venv myenv
 source myenv/bin/activate
-pip install pydub
+pip install -r requirements.txt
 # When finished, desactivate the venv using "deactivate"
 ````
 
@@ -22,4 +22,8 @@ Run the following :
 ````
 $ python3 trimsong.py 
 ````
+Once done, you can remove former file and rename the trimmed files using : 
 
+````
+$ python3 cleanfiletitle.py 
+````

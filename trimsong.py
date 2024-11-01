@@ -7,19 +7,20 @@ from pydub import AudioSegment
 from pydub.silence import detect_silence
 
 TARGET_BITRATE = "128k"
-
+BASIC_SILENCE_THRESHOLD_dBFS = -30
+BASIC_MINIMUM_SILENCE_LENGTH = 100
 
 # README
 # execute with
 # python3 -m venv myenv
 # source myenv/bin/activate
-# pip install pydub 
+# pip install -r requirements.txt
 # python3 trimsong.py
 # Once finished, simply desactivate the virtual environment using "deactivate"
 
 
 
-def trim_silence(audio_file, silence_threshold=-50, min_silence_len=100):
+def trim_silence(audio_file, silence_threshold=BASIC_SILENCE_THRESHOLD_dBFS, min_silence_len=BASIC_MINIMUM_SILENCE_LENGTH):
     # Load the audio file
     sound = AudioSegment.from_mp3(audio_file)
     
@@ -39,16 +40,16 @@ def trim_silence(audio_file, silence_threshold=-50, min_silence_len=100):
             start_trim = 0
         
         # Finding trailing silence
-        if (silence_ranges[-1][0] != 0 & silence_ranges[-1][1] == len(sound)) :
+        if (silence_ranges[-1][0] != 0 & silence_ranges[-1][1] == sound_length) :
             end_trim = silence_ranges[-1][0]
         else:
-            end_trim = len(sound)
+            end_trim = sound_length
 
     else:
         logging.info('No detected silence range')
 
         start_trim = 0
-        end_trim = len(sound)
+        end_trim = sound_length
     
     # Trim the audio
     trimmed_sound = sound[start_trim:end_trim]

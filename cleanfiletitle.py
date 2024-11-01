@@ -9,7 +9,7 @@ import logging, os
 # execute with
 # python3 -m venv myenv
 # source myenv/bin/activate
-# python3 cleanfiletitle.py
+# pip install -r requirements.txt
 # Once finished, simply desactivate the virtual environment using "deactivate"
 
 
