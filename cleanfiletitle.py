@@ -13,11 +13,11 @@ import logging, os
 # Once finished, simply desactivate the virtual environment using "deactivate"
 
 
-def rename_file(dir_path, filename):
+def rename_file(dir_path, filename, extension_to_remove):
     # Vérifier si le fichier se termine par "_trimmed.mp3"
-    if filename.endswith("_trimmed.mp3"):
+    if filename.endswith(extension_to_remove + ".mp3"):
         # Construire le nouveau nom de fichier
-        new_filename = filename.replace("_trimmed.mp3", ".mp3")
+        new_filename = filename.replace(extension_to_remove, "")
         # Construire les chemins complets des fichiers
         old_filepath = os.path.join(dir_path, filename)
         new_filepath = os.path.join(dir_path, new_filename)
@@ -40,7 +40,8 @@ def main():
     for file_path in os.listdir(dir_path):
         logging.info('Processing: {0}'.format(file_path))
         if(file_path.title().endswith('.Mp3')):
-            rename_file(dir_path, file_path)
+            rename_file(dir_path, file_path, "_trimmed")
+            rename_file(dir_path, file_path, "_soundincreased")
 
 
 if __name__ == '__main__':
