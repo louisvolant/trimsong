@@ -12,7 +12,7 @@ import os
 # pip install -r requirements.txt
 # Once finished, simply deactivate the virtual environment using "deactivate"
 
-# List of strings to remove from filenames
+# List of strings to remove from filenames (case-insensitive)
 STRINGS_TO_REMOVE = [
     "(Official Audio)",
     "(Official HD Video)",
@@ -21,13 +21,14 @@ STRINGS_TO_REMOVE = [
     "(Official Music Video)",
     "(Lyrics)",
     "(Clip Officiel)",
+    "(Audio)",
     "_trimmed",
     "_soundincreased"
 ]
 
 def clean_filename(filename):
     """
-    Removes specified strings from the filename.
+    Removes specified strings from the filename (case-insensitive).
 
     Args:
         filename (str): The original filename.
@@ -51,15 +52,17 @@ def rename_file(dir_path, filename):
     cleaned_filename = clean_filename(filename)
 
     if cleaned_filename != filename:  # Only rename if the filename was modified
-        new_filepath = os.path.join(dir_path, cleaned_filename)
+        new_filename = cleaned_filename.rstrip() # remove trailing whitespace
+        if new_filename.lower().endswith(".mp3"): # check if it ends with .mp3
+            new_filepath = os.path.join(dir_path, new_filename)
 
-        # Check if the new filename already exists
-        if os.path.exists(new_filepath):
-            os.remove(new_filepath)
-            print(f"Deleted existing file: {new_filepath}")
+            # Check if the new filename already exists
+            if os.path.exists(new_filepath):
+                os.remove(new_filepath)
+                print(f"Deleted existing file: {new_filepath}")
 
-        os.rename(original_filepath, new_filepath)
-        print(f"Renamed: {original_filepath} to {new_filepath}")
+            os.rename(original_filepath, new_filepath)
+            print(f"Renamed: {original_filepath} to {new_filepath}")
 
 def main():
     """
