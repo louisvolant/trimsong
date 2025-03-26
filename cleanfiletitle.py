@@ -58,9 +58,9 @@ def rename_file(dir_path, filename):
     cleaned_filename = clean_filename(filename)
 
     if cleaned_filename != filename:  # Only rename if the filename was modified
-        new_filepath = os.path.join(dir_path, new_filename)
+        new_filepath = os.path.join(dir_path, cleaned_filename)
 
-        if new_filename.lower().endswith(".mp3"): # check if it ends with .mp3
+        if new_filepath.lower().endswith(".mp3"): # check if it ends with .mp3
             # Check if the new filename already exists
             if os.path.exists(new_filepath):
                 os.remove(new_filepath)
