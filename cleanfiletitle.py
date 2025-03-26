@@ -4,6 +4,7 @@ __version__ = 1.0
 
 import logging
 import os
+import re
 
 # README
 # execute with
@@ -14,21 +15,21 @@ import os
 
 # List of strings to remove from filenames (case-insensitive)
 STRINGS_TO_REMOVE = [
-    "(Official Audio)",
-    "(Official HD Video)",
-    "(Official Video)",
-    "(Official Lyric Video)",
-    "(Official Music Video)",
-    "(Lyrics)",
-    "(Clip Officiel)",
-    "(Audio)",
-    "_trimmed",
-    "_soundincreased"
+    r"\(Official Audio\)",
+    r"\(Official HD Video\)",
+    r"\(Official Video\)",
+    r"\(Official Lyric Video\)",
+    r"\(Official Music Video\)",
+    r"\(Lyrics\)",
+    r"\(Clip Officiel\)",
+    r"\(Audio\)",
+    r"_trimmed",
+    r"_soundincreased"
 ]
 
 def clean_filename(filename):
     """
-    Removes specified strings from the filename (case-insensitive).
+    Removes specified strings from the filename (case-insensitive) using regex.
 
     Args:
         filename (str): The original filename.
@@ -37,7 +38,12 @@ def clean_filename(filename):
         str: The cleaned filename.
     """
     for string_to_remove in STRINGS_TO_REMOVE:
-        filename = filename.replace(string_to_remove, "").strip()  # Remove and strip whitespace
+        filename = re.sub(string_to_remove, "", filename, flags=re.IGNORECASE)
+
+    """
+    Removes potential spaces from the filename
+    """
+    filename = re.sub(r'\s+\.mp3', '\.mp3', filename)
     return filename
 
 def rename_file(dir_path, filename):
@@ -52,10 +58,9 @@ def rename_file(dir_path, filename):
     cleaned_filename = clean_filename(filename)
 
     if cleaned_filename != filename:  # Only rename if the filename was modified
-        new_filename = cleaned_filename.rstrip() # remove trailing whitespace
-        if new_filename.lower().endswith(".mp3"): # check if it ends with .mp3
-            new_filepath = os.path.join(dir_path, new_filename)
+        new_filepath = os.path.join(dir_path, new_filename)
 
+        if new_filename.lower().endswith(".mp3"): # check if it ends with .mp3
             # Check if the new filename already exists
             if os.path.exists(new_filepath):
                 os.remove(new_filepath)
@@ -63,6 +68,8 @@ def rename_file(dir_path, filename):
 
             os.rename(original_filepath, new_filepath)
             print(f"Renamed: {original_filepath} to {new_filepath}")
+        else :
+            print (f"Error : {new_filename} doesn't end with .mp3")
 
 def main():
     """
