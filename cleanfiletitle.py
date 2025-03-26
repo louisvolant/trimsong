@@ -16,12 +16,10 @@ import re
 # List of strings to remove from filenames (case-insensitive)
 STRINGS_TO_REMOVE = [
     r"\(Official Audio\)",
-    r"\(Official HD Video\)",
-    r"\(Official Video\)",
-    r"\(Official Lyric Video\)",
-    r"\(Official Music Video\)",
-    r"\(Lyrics\)",
+    r"\(Official ((?:(?:[A-Za-z\s]+) )?Video)\)",
+    r"\(Lyrics?\)",
     r"\(Clip Officiel\)",
+    r"\(lyric(?:s)? Video\)",
     r"\(Audio\)",
     r"_trimmed",
     r"_soundincreased"
@@ -43,7 +41,7 @@ def clean_filename(filename):
     """
     Removes potential spaces from the filename
     """
-    filename = re.sub(r'\s+\.mp3', '\.mp3', filename)
+    filename = re.sub(r'\s+\.mp3', '.mp3', filename)
     return filename
 
 def rename_file(dir_path, filename):
