@@ -15,12 +15,13 @@ import re
 
 # List of strings to remove from filenames (case-insensitive)
 STRINGS_TO_REMOVE = [
-    r"\(Official Audio\)",
+    r"\(Audio( Officiel)?\)",
+    r"[(\[]Official Audio[)\]]",
     r"\(Official ((?:(?:[A-Za-z\s]+) )?Video)\)",
     r"\(Lyrics?\)",
     r"\(Clip Officiel\)",
     r"\(lyric(?:s)? Video\)",
-    r"\(Audio\)",
+    r"\(Paroles\)",
     r"_trimmed",
     r"_soundincreased"
 ]
