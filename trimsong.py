@@ -7,7 +7,7 @@ from pydub import AudioSegment
 from pydub.silence import detect_silence
 
 TARGET_BITRATE = "128k"
-BASIC_SILENCE_THRESHOLD_dBFS = -30
+BASIC_SILENCE_THRESHOLD_dBFS = -45
 BASIC_MINIMUM_SILENCE_LENGTH = 100
 
 # README
