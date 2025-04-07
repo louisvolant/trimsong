@@ -17,7 +17,7 @@ import re
 STRINGS_TO_REMOVE = [
     r"\(Audio( Officiel)?\)",
     r"[(\[]Official Audio[)\]]",
-    r"\(Official ((?:(?:[A-Za-z\s]+) )?Video)\)",
+    r"[(\[]Official (?:(?:[A-Za-z\s]+) )?Video[)\]]",
     r"\(Lyrics?\)",
     r"\(Clip Officiel\)",
     r"\(lyric(?:s)? Video\)",
