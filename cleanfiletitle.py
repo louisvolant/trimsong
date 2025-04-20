@@ -18,10 +18,12 @@ STRINGS_TO_REMOVE = [
     r"\(Audio( Officiel)?\)",
     r"[(\[]Official Audio[)\]]",
     r"[(\[]Official (?:(?:[A-Za-z\s]+) )?Video[)\]]",
+    r"Official Lyrics Video",
     r"\(Lyrics?\)",
     r"\(Clip Officiel\)",
     r"\(lyric(?:s)? Video\)",
     r"\(Paroles\)",
+    r"\(Vidéo officielle\)",
     r"_trimmed",
     r"_soundincreased"
 ]
