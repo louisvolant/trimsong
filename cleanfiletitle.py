@@ -25,6 +25,9 @@ STRINGS_TO_REMOVE = [
     r"\(lyric(?:s)? Video\)",
     r"\(Paroles\)",
     r"\(Vidéo officielle\)",
+    r"\(Clip officiel HD\)",
+    r"\(Official Lyrics Vidéo\)",
+    r"- Official Music Video",
     r"_trimmed",
     r"_soundincreased"
 ]
