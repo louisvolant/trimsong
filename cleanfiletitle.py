@@ -26,10 +26,11 @@ STRINGS_TO_REMOVE = [
     r"\(Paroles\)",
     r"\(Vidéo officielle\)",
     r"\(Clip officiel HD\)",
-    r"\(Official Lyrics Vidéo\)",
+    r"\(Official Lyrics Vidéo\)",
     r"- Official Music Video",
     r"_trimmed",
-    r"_soundincreased"
+    r"_soundincreased",
+    r"-\s*Topic\s*"
 ]
 
 def clean_filename(filename):
