@@ -30,7 +30,12 @@ STRINGS_TO_REMOVE = [
     r"- Official Music Video",
     r"_trimmed",
     r"_soundincreased",
-    r"-\s*Topic\s*"
+    r"-\s*Topic\s*",
+    r"\(official video reworked\)",
+    r"\(Avec paroles\)",
+    r"\(Official Visualiser\)",
+    r"\s*-\s*reworked",
+    r"\s*\(official video\)"
 ]
 
 def clean_filename(filename):
@@ -43,14 +48,22 @@ def clean_filename(filename):
     Returns:
         str: The cleaned filename.
     """
+    # Separate the extension from the base name
+    base_name, ext = os.path.splitext(filename)
+
     for string_to_remove in STRINGS_TO_REMOVE:
-        filename = re.sub(string_to_remove, "", filename, flags=re.IGNORECASE)
+        base_name = re.sub(string_to_remove, "", base_name, flags=re.IGNORECASE)
+
+    # Remove any trailing hyphens or spaces that might result from removals
+    base_name = base_name.strip(' -')
 
     """
     Removes potential spaces from the filename
     """
-    filename = re.sub(r'\s+\.mp3', '.mp3', filename)
-    return filename
+    # This regex now applies to the base_name to clean up spaces before the extension is re-added
+    base_name = re.sub(r'\s+$', '', base_name) # Remove trailing spaces
+
+    return base_name + ext
 
 def rename_file(dir_path, filename):
     """
@@ -69,13 +82,20 @@ def rename_file(dir_path, filename):
         if new_filepath.lower().endswith(".mp3"): # check if it ends with .mp3
             # Check if the new filename already exists
             if os.path.exists(new_filepath):
-                os.remove(new_filepath)
-                print(f"Deleted existing file: {new_filepath}")
+                # If the target file already exists and is the same as the original after cleaning,
+                # we don't need to do anything. Otherwise, we remove it to prevent conflicts.
+                if os.path.samefile(original_filepath, new_filepath):
+                    print(f"File already clean: {original_filepath}")
+                    return
+                else:
+                    os.remove(new_filepath)
+                    print(f"Deleted existing file: {new_filepath}")
 
             os.rename(original_filepath, new_filepath)
             print(f"Renamed: {original_filepath} to {new_filepath}")
         else :
-            print (f"Error : {new_filename} doesn't end with .mp3")
+            print(f"Error: {cleaned_filename} doesn't end with .mp3 or has an unexpected format.")
+
 
 def main():
     """
