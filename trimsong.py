@@ -110,11 +110,12 @@ def handleMp3File(inputFilePath):
 
 def main():
     dir_path = '.'
+    mp3_files = [f for f in os.listdir(dir_path) if f.lower().endswith('.mp3')]
+    total_files = len(mp3_files)
 
-    for file_path in os.listdir(dir_path):
-        logging.info('Processing: {0}'.format(file_path))
-        if file_path.lower().endswith('.mp3'):  # Use .lower() for case-insensitivity
-            handleMp3File(file_path)
+    for i, file_path in enumerate(mp3_files):
+        logging.info(f'Processing file {i + 1}/{total_files}: {file_path}') # add progression
+        handleMp3File(file_path)
 
 
 if __name__ == '__main__':
