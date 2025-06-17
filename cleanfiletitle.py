@@ -1,6 +1,6 @@
 #!/usr/local/bin/python3
 __author__ = 'Louis Volant'
-__version__ = 1.1
+__version__ = 1.2
 
 import logging
 import os
@@ -22,7 +22,7 @@ STRINGS_TO_REMOVE = [
     r"Official Lyrics Video",
     r"[(\[]Lyrics?[)\]]",
     r"\(Clip Officiel\)",
-    r"\(lyric(?:s)? Video\)",
+    r"\(lyric(?:s)?\s*vid[eé]o\)",
     r"\(Paroles\)",
     r"\(Vidéo officielle\)",
     r"\(Clip officiel HD\)",
