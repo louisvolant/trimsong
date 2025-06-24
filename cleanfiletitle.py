@@ -54,9 +54,11 @@ def capitalize_after_paren(filename):
     """
     return re.sub(r'(\()\s*([a-z])', lambda m: m.group(1) + m.group(2).upper(), filename)
 
+
 def clean_filename(filename):
     """
-    Removes specified strings from the filename (case-insensitive) using regex and corrects capitalization.
+    Removes specified strings from the filename (case-insensitive) using regex and corrects capitalization,
+    and standardizes various dash characters.
 
     Args:
         filename (str): The original filename.
@@ -66,6 +68,17 @@ def clean_filename(filename):
     """
     # Separate the extension from the base name
     base_name, ext = os.path.splitext(filename)
+
+    # Standardize the long dash (en dash '–' and em dash '—') to a standard hyphen-minus ('-')
+    # Replace the spaced long dash ' – ' with the desired ' - '
+    base_name = base_name.replace(' – ', ' - ')
+    # Replace non-spaced en dash ('–') and em dash ('—') with standard hyphen-minus ('-')
+    base_name = base_name.replace('—', '-')
+    base_name = base_name.replace('–', '-')
+    # Remove any resulting double spaces or double hyphens that might occur from the replacement
+    base_name = base_name.replace('  ', ' ')
+    base_name = base_name.replace('--', '-')
+
 
     for string_to_remove in STRINGS_TO_REMOVE:
         base_name = re.sub(string_to_remove, "", base_name, flags=re.IGNORECASE)
@@ -77,7 +90,7 @@ def clean_filename(filename):
     base_name = base_name.strip(' -')
 
     # Removes potential spaces from the filename
-    base_name = re.sub(r'\s+$', '', base_name) # Remove trailing spaces
+    base_name = re.sub(r'\s+$', '', base_name)  # Remove trailing spaces
 
     return base_name + ext
 
