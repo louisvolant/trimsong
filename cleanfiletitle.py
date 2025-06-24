@@ -14,11 +14,14 @@ import re
 # Once finished, simply deactivate the virtual environment using "deactivate"
 
 # List of strings to remove from filenames (case-insensitive)
-# List of strings to remove from filenames (case-insensitive)
 STRINGS_TO_REMOVE = [
+    # --- Updated Visualizer Regex (Covers your new cases) ---
+    # Matches (Visualizer), (Official Visualizer), (Official Video Visualizer), (Visualiser)
+    r"[(\[](?:Official\s+)?(?:Video\s+)?Visuali[sz]er[)\]]",
+
+    # --- Existing Patterns ---
     r"\(Audio( Officiel)?\)",
     r"[(\[]Official Audio[)\]]",
-    r"[(\[]Official Visualizer[)\]]",
     r"[(\[]Official (?:(?:[A-Za-z\s]+) )?Video[)\]]",
     r"Official Lyrics Video",
     r"[(\[]Lyrics?[)\]]",
@@ -34,7 +37,6 @@ STRINGS_TO_REMOVE = [
     r"-\s*Topic\s*",
     r"\(official video reworked\)",
     r"\(Avec paroles\)",
-    r"\(Official Visualiser\)",
     r"\s*-\s*reworked",
     r"\s*\(official video\)",
     r"\(Videoclip\)",
