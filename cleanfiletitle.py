@@ -41,15 +41,28 @@ STRINGS_TO_REMOVE = [
     r"\(Offizielles Musikvideo\)"
 ]
 
-def clean_filename(filename):
+
+def capitalize_after_paren(filename):
     """
-    Removes specified strings from the filename (case-insensitive) using regex.
+    Capitalizes the first letter after an opening parenthesis in a filename.
 
     Args:
         filename (str): The original filename.
 
     Returns:
-        str: The cleaned filename.
+        str: The filename with corrected capitalization.
+    """
+    return re.sub(r'(\()\s*([a-z])', lambda m: m.group(1) + m.group(2).upper(), filename)
+
+def clean_filename(filename):
+    """
+    Removes specified strings from the filename (case-insensitive) using regex and corrects capitalization.
+
+    Args:
+        filename (str): The original filename.
+
+    Returns:
+        str: The cleaned and formatted filename.
     """
     # Separate the extension from the base name
     base_name, ext = os.path.splitext(filename)
@@ -57,13 +70,13 @@ def clean_filename(filename):
     for string_to_remove in STRINGS_TO_REMOVE:
         base_name = re.sub(string_to_remove, "", base_name, flags=re.IGNORECASE)
 
+    # Correct capitalization after opening parentheses
+    base_name = capitalize_after_paren(base_name)
+
     # Remove any trailing hyphens or spaces that might result from removals
     base_name = base_name.strip(' -')
 
-    """
-    Removes potential spaces from the filename
-    """
-    # This regex now applies to the base_name to clean up spaces before the extension is re-added
+    # Removes potential spaces from the filename
     base_name = re.sub(r'\s+$', '', base_name) # Remove trailing spaces
 
     return base_name + ext
