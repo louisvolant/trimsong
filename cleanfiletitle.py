@@ -14,6 +14,7 @@ import re
 # Once finished, simply deactivate the virtual environment using "deactivate"
 
 # List of strings to remove from filenames (case-insensitive)
+# List of strings to remove from filenames (case-insensitive)
 STRINGS_TO_REMOVE = [
     r"\(Audio( Officiel)?\)",
     r"[(\[]Official Audio[)\]]",
@@ -35,7 +36,9 @@ STRINGS_TO_REMOVE = [
     r"\(Avec paroles\)",
     r"\(Official Visualiser\)",
     r"\s*-\s*reworked",
-    r"\s*\(official video\)"
+    r"\s*\(official video\)",
+    r"\(Videoclip\)",
+    r"\(Offizielles Musikvideo\)"
 ]
 
 def clean_filename(filename):
