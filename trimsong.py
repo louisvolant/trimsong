@@ -3,6 +3,7 @@ __author__ = 'Louis Volant'
 __version__ = 1.1
 
 import logging, os
+import time
 from pydub import AudioSegment
 from pydub.silence import detect_silence
 
@@ -115,7 +116,10 @@ def main():
 
     for i, file_path in enumerate(mp3_files):
         logging.info(f'Processing file {i + 1}/{total_files}: {file_path}') # add progression
+        start_time = time.time()
         handleMp3File(file_path)
+        elapsed = time.time() - start_time
+        logging.info(f"Processed '{file_path}' in {elapsed:.2f}s")
 
 
 if __name__ == '__main__':

@@ -3,6 +3,7 @@ __author__ = 'Louis Volant'
 __version__= 1.0
 
 import logging, os
+import time
 from pydub import AudioSegment
 
 BASIC_THRESHOLD_dBFS = -15
@@ -48,7 +49,10 @@ def main():
 
     for i, file_path in enumerate(mp3_files):
         logging.info(f'Processing file {i + 1}/{total_files}: {file_path}') # Add progression
+        start_time = time.time()
         handleMp3File(file_path)
+        elapsed = time.time() - start_time
+        logging.info(f"Processed '{file_path}' in {elapsed:.2f}s")
 
 if __name__ == '__main__':
     # Initialize logging before hitting main, in case we need extra debuggability

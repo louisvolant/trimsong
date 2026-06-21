@@ -4,6 +4,7 @@ __version__ = 1.0
 
 import logging
 import os
+import time
 from pydub import AudioSegment
 
 # Target bitrate for the output MP3 file
@@ -72,7 +73,10 @@ def main():
     # Process each file and log the progress
     for i, file_path in enumerate(wav_files):
         logging.info(f"--- Processing file {i + 1}/{total_files}: {file_path} ---")
+        start_time = time.time()
         handle_wav_file(file_path)
+        elapsed = time.time() - start_time
+        logging.info(f"Processed '{file_path}' in {elapsed:.2f}s")
 
 
 if __name__ == '__main__':
