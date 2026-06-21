@@ -1,11 +1,14 @@
 #!/usr/local/bin/python3
 __author__ = 'Louis Volant'
-__version__ = 1.1
+__version__ = 1.2
 
-import logging, os
+import logging
+import os
+import subprocess
 import time
+from concurrent.futures import ProcessPoolExecutor
+import multiprocessing as mp
 from pydub import AudioSegment
-from pydub.silence import detect_silence
 
 TARGET_BITRATE = "128k"
 BASIC_SILENCE_THRESHOLD_dBFS = -45
@@ -21,8 +24,28 @@ CONFIGURABLE_SILENCE_TO_LEAVE_MS = 200  # Configurable parameter, in ms
 # python3 trimsong.py
 # Once finished, simply desactivate the virtual environment using "deactivate"
 
+def get_silence_ranges_ffmpeg(audio_file, silence_threshold=-45, min_silence_len=0.1):
+    """Return list of (start_ms, end_ms) silence ranges using ffmpeg silencedetect."""
+    cmd = [
+        "ffmpeg", "-i", audio_file,
+        "-af", f"silencedetect=n={silence_threshold}dB:d={min_silence_len}",
+        "-f", "null", "-"
+    ]
+    result = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+    ranges = []
+    start = None
+    for line in result.stderr.splitlines():
+        if "silence_start" in line:
+            start = float(line.split("silence_start: ")[1]) * 1000
+        elif "silence_end" in line and start is not None:
+            end = float(line.split("silence_end: ")[1].split(" ")[0]) * 1000
+            ranges.append((int(start), int(end)))
+            start = None
+    return ranges
+
+
 def trim_silence(audio_file, silence_threshold=BASIC_SILENCE_THRESHOLD_dBFS,
-                 min_silence_len_to_detect=BASIC_MINIMUM_SILENCE_LENGTH,
+                 min_silence_len_to_detect=BASIC_MINIMUM_SILENCE_LENGTH / 1000,
                  silence_to_leave_ms=CONFIGURABLE_SILENCE_TO_LEAVE_MS):
     """
     Trims leading and trailing silence from an audio file, leaving a configurable minimum
@@ -31,7 +54,7 @@ def trim_silence(audio_file, silence_threshold=BASIC_SILENCE_THRESHOLD_dBFS,
     Args:
         audio_file (str): Path to the input audio file.
         silence_threshold (int): The silence threshold in dBFS.
-        min_silence_len_to_detect (int): The minimum length of silence in ms to detect.
+        min_silence_len_to_detect (float): The minimum length of silence in seconds to detect.
         silence_to_leave_ms (int): The minimum amount of silence in ms to leave if
                                     the detected silence is longer than this value.
 
@@ -43,8 +66,12 @@ def trim_silence(audio_file, silence_threshold=BASIC_SILENCE_THRESHOLD_dBFS,
 
     sound_length = len(sound)
 
-    # Detect silence
-    silence_ranges = detect_silence(sound, min_silence_len=min_silence_len_to_detect, silence_thresh=silence_threshold)
+    # Detect silence using ffmpeg (much faster than pydub)
+    silence_ranges = get_silence_ranges_ffmpeg(
+        audio_file,
+        silence_threshold=silence_threshold,
+        min_silence_len=min_silence_len_to_detect
+    )
 
     start_trim = 0
     end_trim = sound_length
@@ -101,12 +128,14 @@ def trim_silence(audio_file, silence_threshold=BASIC_SILENCE_THRESHOLD_dBFS,
     return trimmed_sound
 
 
-def handleMp3File(inputFilePath):
-    outputFilePath = inputFilePath.replace(".mp3", "_trimmed.mp3")
-    logging.info('Trimming origin file: {0}. New file : {1}'.format(inputFilePath, outputFilePath))
-    # Pass the configurable silence to leave to the trim_silence function
-    trimmed_audio = trim_silence(inputFilePath, silence_to_leave_ms=CONFIGURABLE_SILENCE_TO_LEAVE_MS)
+def process_file(file_path):
+    """Process a single file and return timing/result info (no logging during execution)."""
+    start_time = time.time()
+    outputFilePath = file_path.replace(".mp3", "_trimmed.mp3")
+    trimmed_audio = trim_silence(file_path, silence_to_leave_ms=CONFIGURABLE_SILENCE_TO_LEAVE_MS)
     trimmed_audio.export(outputFilePath, format="mp3", bitrate=TARGET_BITRATE)
+    elapsed = time.time() - start_time
+    return file_path, outputFilePath, elapsed
 
 
 def main():
@@ -114,11 +143,17 @@ def main():
     mp3_files = [f for f in os.listdir(dir_path) if f.lower().endswith('.mp3')]
     total_files = len(mp3_files)
 
-    for i, file_path in enumerate(mp3_files):
-        logging.info(f'Processing file {i + 1}/{total_files}: {file_path}') # add progression
-        start_time = time.time()
-        handleMp3File(file_path)
-        elapsed = time.time() - start_time
+    results = []
+    with ProcessPoolExecutor(max_workers=mp.cpu_count()) as executor:
+        futures = {executor.submit(process_file, f): f for f in mp3_files}
+        for future in futures:
+            result = future.result()
+            results.append(result)
+
+    # Print summary logs AFTER all parallel work is done (preserves timing clarity)
+    for i, (file_path, outputFilePath, elapsed) in enumerate(results):
+        logging.info(f'Processing file {i + 1}/{total_files}: {file_path}')
+        logging.info('Trimming origin file: {0}. New file : {1}'.format(file_path, outputFilePath))
         logging.info(f"Processed '{file_path}' in {elapsed:.2f}s")
 
 
