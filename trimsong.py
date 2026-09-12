@@ -22,7 +22,7 @@ CONFIGURABLE_SILENCE_TO_LEAVE_MS = 200  # Configurable parameter, in ms
 # source myenv/bin/activate
 # pip install -r requirements.txt
 # python3 trimsong.py
-# Once finished, simply desactivate the virtual environment using "deactivate"
+# Once finished, simply deactivate the virtual environment using "deactivate"
 
 def get_silence_ranges_ffmpeg(audio_file, silence_threshold=-45, min_silence_len=0.1):
     """Return list of (start_ms, end_ms) silence ranges using ffmpeg silencedetect."""

@@ -1,10 +1,11 @@
 #!/usr/local/bin/python3
 __author__ = 'Louis Volant'
-__version__ = 1.2
+__version__ = 1.3
 
 import logging
 import os
 import re
+import unicodedata
 
 # README
 # execute with
@@ -18,6 +19,18 @@ STRINGS_TO_REMOVE = [
     # --- Updated Visualizer Regex (Covers your new cases) ---
     # Matches (Visualizer), (Official Visualizer), (Official Video Visualizer), (Visualiser)
     r"[(\[](?:Official\s+)?(?:Video\s+)?Visuali[sz]er[)\]]",
+
+    # --- Quality / Resolution Tags ---
+    # Matches [HD], (HD), [4K], (4K), [HQ], (HQ), [1080p], [720p], [HD 1080p], [4K UHD], etc.
+    r"[(\[]\s*(?:(?:Ultra\s+)?HD|HQ|4K|2K|1080p|720p)(?:\s*(?:1080p|720p|60fps|UHD|HD))?\s*[)\]]",
+
+    # --- Spanish / Portuguese Patterns ---
+    # Matches (Video Oficial), [Video Oficial], (Vídeo Oficial), (Audio Oficial), (Videoclip Oficial), etc.
+    r"[(\[](?:(?:Video\s*clip|V[ií]d[eé]o(?:\s+(?:musical|lyric|letra))?|Audio|Clip|Music\s+Video)\s+)?Oficial(?:\s+HD)?\s*[)\]]",
+    r"-\s*V[ií]d[eé]o\s+Oficial",
+
+    # --- German Patterns ---
+    r"[(\[]Offizielles\s+(?:Musik)?video[)\]]",
 
     # --- Existing Patterns ---
     r"\(Audio( Officiel)?\)",
@@ -68,6 +81,9 @@ def clean_filename(filename):
     Returns:
         str: The cleaned and formatted filename.
     """
+    # Normalize unicode to NFC (joins base characters with their diacritics)
+    filename = unicodedata.normalize('NFC', filename)
+
     # Separate the extension from the base name
     base_name, ext = os.path.splitext(filename)
 
@@ -78,9 +94,8 @@ def clean_filename(filename):
     base_name = base_name.replace('—', '-')
     base_name = base_name.replace('–', '-')
     # Remove any resulting double spaces or double hyphens that might occur from the replacement
-    base_name = base_name.replace('  ', ' ')
+    base_name = re.sub(r' +', ' ', base_name)
     base_name = base_name.replace('--', '-')
-
 
     for string_to_remove in STRINGS_TO_REMOVE:
         base_name = re.sub(string_to_remove, "", base_name, flags=re.IGNORECASE)
@@ -88,11 +103,12 @@ def clean_filename(filename):
     # Correct capitalization after opening parentheses
     base_name = capitalize_after_paren(base_name)
 
-    # Remove any trailing hyphens or spaces that might result from removals
-    base_name = base_name.strip(' -')
+    # Remove any leftover empty parentheses or brackets
+    base_name = re.sub(r'[(\[]\s*[)\]]', '', base_name)
 
-    # Removes potential spaces from the filename
-    base_name = re.sub(r'\s+$', '', base_name)  # Remove trailing spaces
+    # Clean up multiple spaces and strip trailing hyphens or spaces resulting from removals
+    base_name = re.sub(r' +', ' ', base_name)
+    base_name = base_name.strip(' -')
 
     return base_name + ext
 
