@@ -1,11 +1,11 @@
 #!/usr/local/bin/python3
 __author__ = 'Louis Volant'
-__version__ = 1.0
+__version__ = 2.0
 
 import logging
 import os
+import subprocess
 import time
-from pydub import AudioSegment
 
 # Target bitrate for the output MP3 file
 TARGET_BITRATE = "128k"
@@ -19,8 +19,8 @@ TARGET_BITRATE = "128k"
 #    python3 -m venv myenv
 #    source myenv/bin/activate
 #
-# 2. Install required packages (pydub requires ffmpeg/libav):
-#    pip install pydub
+# 2. Install required packages:
+#    pip install -r requirements.txt
 #
 # 3. Run the script:
 #    python3 wav_to_mp3.py
@@ -30,28 +30,28 @@ TARGET_BITRATE = "128k"
 
 def handle_wav_file(input_wav_path):
     """
-    Loads a .wav file and exports it as an .mp3 file with the target bitrate.
+    Converts a .wav file to .mp3 using ffmpeg.
 
     Args:
         input_wav_path (str): The path to the input .wav file.
     """
-    # Construct the output filename by replacing the extension
     output_mp3_path = os.path.splitext(input_wav_path)[0] + ".mp3"
 
     logging.info(f"Converting '{input_wav_path}' to '{output_mp3_path}'")
 
     try:
-        # Load the .wav file
-        audio = AudioSegment.from_wav(input_wav_path)
-
-        # Export the audio to .mp3 format with the specified bitrate
-        audio.export(output_mp3_path, format="mp3", bitrate=TARGET_BITRATE)
-
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", input_wav_path,
+            "-codec:a", "libmp3lame", "-b:a", TARGET_BITRATE,
+            output_mp3_path
+        ]
+        subprocess.run(cmd, check=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
         logging.info(f"Successfully exported '{output_mp3_path}' with a bitrate of {TARGET_BITRATE}.")
 
     except FileNotFoundError:
         logging.error(f"Error: The file '{input_wav_path}' was not found.")
-    except Exception as e:
+    except subprocess.CalledProcessError as e:
         logging.error(f"An error occurred while processing '{input_wav_path}': {e}")
 
 

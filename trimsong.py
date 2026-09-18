@@ -1,6 +1,6 @@
 #!/usr/local/bin/python3
 __author__ = 'Louis Volant'
-__version__ = 1.2
+__version__ = 2.0
 
 import logging
 import os
@@ -8,7 +8,6 @@ import subprocess
 import time
 from concurrent.futures import ProcessPoolExecutor
 import multiprocessing as mp
-from pydub import AudioSegment
 
 TARGET_BITRATE = "128k"
 BASIC_SILENCE_THRESHOLD_dBFS = -45
@@ -23,6 +22,18 @@ CONFIGURABLE_SILENCE_TO_LEAVE_MS = 200  # Configurable parameter, in ms
 # pip install -r requirements.txt
 # python3 trimsong.py
 # Once finished, simply deactivate the virtual environment using "deactivate"
+
+def get_duration_ms(audio_file):
+    """Return duration of audio file in milliseconds using ffprobe."""
+    cmd = [
+        "ffprobe", "-v", "error",
+        "-show_entries", "format=duration",
+        "-of", "default=noprint_wrappers=1:nokey=1",
+        audio_file
+    ]
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    return int(float(result.stdout.strip()) * 1000)
+
 
 def get_silence_ranges_ffmpeg(audio_file, silence_threshold=-45, min_silence_len=0.1):
     """Return list of (start_ms, end_ms) silence ranges using ffmpeg silencedetect."""
@@ -59,14 +70,11 @@ def trim_silence(audio_file, silence_threshold=BASIC_SILENCE_THRESHOLD_dBFS,
                                     the detected silence is longer than this value.
 
     Returns:
-        pydub.AudioSegment: The trimmed audio segment.
+        tuple: (start_trim_ms, end_trim_ms) trim points in milliseconds.
     """
-    # Load the audio file
-    sound = AudioSegment.from_mp3(audio_file)
+    sound_length = get_duration_ms(audio_file)
 
-    sound_length = len(sound)
-
-    # Detect silence using ffmpeg (much faster than pydub)
+    # Detect silence using ffmpeg
     silence_ranges = get_silence_ranges_ffmpeg(
         audio_file,
         silence_threshold=silence_threshold,
@@ -95,7 +103,6 @@ def trim_silence(audio_file, silence_threshold=BASIC_SILENCE_THRESHOLD_dBFS,
             start_trim = 0
 
         # Handle trailing silence
-        # Check if the last silence range extends to the end of the sound
         if silence_ranges[-1][1] == sound_length:
             trailing_silence_duration = silence_ranges[-1][1] - silence_ranges[-1][0]
             if trailing_silence_duration > silence_to_leave_ms:
@@ -122,20 +129,35 @@ def trim_silence(audio_file, silence_threshold=BASIC_SILENCE_THRESHOLD_dBFS,
         start_trim = 0
         end_trim = sound_length
 
-    # Trim the audio
-    trimmed_sound = sound[start_trim:end_trim]
-
-    return trimmed_sound
+    return start_trim, end_trim
 
 
 def process_file(file_path):
     """Process a single file and return timing/result info (no logging during execution)."""
     start_time = time.time()
-    outputFilePath = file_path.replace(".mp3", "_trimmed.mp3")
-    trimmed_audio = trim_silence(file_path, silence_to_leave_ms=CONFIGURABLE_SILENCE_TO_LEAVE_MS)
-    trimmed_audio.export(outputFilePath, format="mp3", bitrate=TARGET_BITRATE)
+    output_file_path = file_path.replace(".mp3", "_trimmed.mp3")
+
+    start_trim_ms, end_trim_ms = trim_silence(
+        file_path,
+        silence_to_leave_ms=CONFIGURABLE_SILENCE_TO_LEAVE_MS
+    )
+
+    # Convert ms to seconds for ffmpeg
+    start_sec = start_trim_ms / 1000.0
+    duration_sec = (end_trim_ms - start_trim_ms) / 1000.0
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", file_path,
+        "-ss", str(start_sec),
+        "-t", str(duration_sec),
+        "-codec:a", "libmp3lame", "-b:a", TARGET_BITRATE,
+        output_file_path
+    ]
+    subprocess.run(cmd, check=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+
     elapsed = time.time() - start_time
-    return file_path, outputFilePath, elapsed
+    return file_path, output_file_path, elapsed
 
 
 def main():

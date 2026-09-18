@@ -1,2 +1,3 @@
-pydub
-pyaudioop
+# No Python package dependencies needed.
+# All audio processing is done via ffmpeg/ffprobe system binaries.
+# Make sure ffmpeg is installed: brew install ffmpeg
