@@ -1,6 +1,6 @@
 #!/usr/local/bin/python3
 __author__ = 'Louis Volant'
-__version__ = 2.0
+__version__ = 2.1
 
 import logging
 import os
@@ -155,6 +155,7 @@ def process_file(file_path):
         output_file_path
     ]
     subprocess.run(cmd, check=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+    os.remove(file_path)
 
     elapsed = time.time() - start_time
     return file_path, output_file_path, elapsed

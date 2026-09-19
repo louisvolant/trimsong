@@ -1,6 +1,6 @@
 #!/usr/local/bin/python3
 __author__ = 'Louis Volant'
-__version__= 2.0
+__version__ = 2.1
 
 import json
 import logging
@@ -60,6 +60,7 @@ def handleMp3File(audio_file):
             new_file_name
         ]
         subprocess.run(cmd, check=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        os.remove(audio_file)
         print(f"Exported as: {new_file_name}")
     else:
         print("The sound level is sufficient, no modification necessary.")
